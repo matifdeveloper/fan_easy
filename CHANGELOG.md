@@ -1,3 +1,9 @@
+## 0.0.3
+
+* Enhanced error handling for better debugging.
+* Improved ad loading logic to reduce failures.
+* Optimized banner and native ad rendering performance.
+
 ## 0.0.2
 
 * Fixed compatibility issues with WebAssembly (Wasm) by adding platform checks.
@@ -9,4 +15,4 @@
 * Initial release of **FanEasy** 🎉
 * Simplified Facebook Audience Network ad integration for Flutter.
 * Supports Banner, Native, Interstitial, and Rewarded ads.
-* Easy-to-use singleton instance: `FanEasy.instance.loadInit()`, `FanEasy.instance.showInterstitial()`, etc.  
+* Easy-to-use singleton instance: `FanEasy.instance.loadInit()`, `FanEasy.instance.showInterstitial()`, etc.
