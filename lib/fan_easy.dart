@@ -3,6 +3,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:facebook_audience_network/facebook_audience_network.dart';
 
+/// A singleton class to manage Facebook Audience Network ads easily.
 class FanEasy {
   static final FanEasy instance = FanEasy._internal();
 
@@ -12,6 +13,9 @@ class FanEasy {
 
   FanEasy._internal();
 
+  /// Initializes the Facebook Audience Network SDK.
+  ///
+  /// [testingId] is optional and used for testing purposes.
   void loadInit({String? testingId}) {
     FacebookAudienceNetwork.init(
       testingId: testingId,
@@ -20,8 +24,10 @@ class FanEasy {
     _isInitLoaded = true;
   }
 
+  /// Returns `true` if the SDK is initialized.
   bool get initLoaded => _isInitLoaded;
 
+  /// Loads an interstitial ad with the given [placementId].
   void loadInterstitial({required String placementId}) {
     FacebookInterstitialAd.loadInterstitialAd(
       placementId: placementId,
@@ -36,6 +42,7 @@ class FanEasy {
     );
   }
 
+  /// Shows the loaded interstitial ad if available.
   void showInterstitial() {
     if (_isInterstitialLoaded) {
       FacebookInterstitialAd.showInterstitialAd();
@@ -44,8 +51,10 @@ class FanEasy {
     }
   }
 
+  /// Returns `true` if an interstitial ad is loaded.
   bool get interstitialLoaded => _isInterstitialLoaded;
 
+  /// Loads a rewarded video ad with the given [placementId].
   void loadRewarded({required String placementId}) {
     FacebookRewardedVideoAd.loadRewardedVideoAd(
       placementId: placementId,
@@ -60,6 +69,7 @@ class FanEasy {
     );
   }
 
+  /// Shows the loaded rewarded video ad if available.
   void showRewarded() {
     if (_isRewardedLoaded) {
       FacebookRewardedVideoAd.showRewardedVideoAd();
@@ -68,8 +78,10 @@ class FanEasy {
     }
   }
 
+  /// Returns `true` if a rewarded ad is loaded.
   bool get rewardedLoaded => _isRewardedLoaded;
 
+  /// Returns a banner ad widget with the given [placementId] and [bannerSize].
   Widget bannerAd(
       {required String placementId,
       BannerSize bannerSize = BannerSize.STANDARD}) {
@@ -82,6 +94,7 @@ class FanEasy {
     );
   }
 
+  /// Returns a native ad widget with the given [placementId], [width], and [height].
   Widget nativeAd(
       {required String placementId,
       double width = double.infinity,
