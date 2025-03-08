@@ -1,3 +1,9 @@
+## 0.0.4
+
+* Refactored code for better maintainability and readability.
+* Improved ad reloading logic to handle failures more efficiently.
+* Updated to align with latest `easy_audience_network` package improvements.
+
 ## 0.0.3
 
 * Enhanced error handling for better debugging.

@@ -2,7 +2,7 @@ name: fan_easy
 description: "FanEasy is a simple Flutter package for seamless integration of Facebook Audience Network ads with easy-to-use methods."
 homepage: https://github.com/matifdeveloper/fan_easy
 repository: https://github.com/matifdeveloper/fan_easy
-version: 0.0.3
+version: 0.0.4
 fan_easy:
   path: ../fan_easy
 
@@ -13,7 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  facebook_audience_network: ^1.0.1
+  easy_audience_network: ^0.0.7
 
 dev_dependencies:
   flutter_test:

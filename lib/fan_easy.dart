@@ -1,25 +1,32 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:facebook_audience_network/facebook_audience_network.dart';
+import 'package:easy_audience_network/easy_audience_network.dart';
 
-/// A singleton class to manage Facebook Audience Network ads easily.
+/// A singleton class to manage Audience Network ads easily.
 class FanEasy {
   static final FanEasy instance = FanEasy._internal();
 
   bool _isInitLoaded = false;
   bool _isInterstitialLoaded = false;
   bool _isRewardedLoaded = false;
+  InterstitialAd? _interstitialAd;
+  RewardedAd? _rewardedAd;
 
   FanEasy._internal();
 
-  /// Initializes the Facebook Audience Network SDK.
+  /// Initializes the Audience Network SDK.
   ///
-  /// [testingId] is optional and used for testing purposes.
-  void loadInit({String? testingId}) {
-    FacebookAudienceNetwork.init(
+  /// [testMode] is optional and used for testing purposes.
+  Future<void> loadInit({
+    String? testingId,
+    bool testMode = false,
+    bool iOSAdvertiserTrackingEnabled = false,
+  }) async {
+    await EasyAudienceNetwork.init(
       testingId: testingId,
-      iOSAdvertiserTrackingEnabled: true,
+      testMode: testMode,
+      iOSAdvertiserTrackingEnabled: iOSAdvertiserTrackingEnabled,
     );
     _isInitLoaded = true;
   }
@@ -29,23 +36,28 @@ class FanEasy {
 
   /// Loads an interstitial ad with the given [placementId].
   void loadInterstitial({required String placementId}) {
-    FacebookInterstitialAd.loadInterstitialAd(
-      placementId: placementId,
-      listener: (result, value) {
-        if (result == InterstitialAdResult.LOADED) _isInterstitialLoaded = true;
-        if (result == InterstitialAdResult.DISMISSED &&
-            value["invalidated"] == true) {
-          _isInterstitialLoaded = false;
-          loadInterstitial(placementId: placementId);
-        }
+    if (placementId.isEmpty) {
+      return;
+    }
+    _interstitialAd = InterstitialAd(placementId);
+    _interstitialAd?.listener = InterstitialAdListener(
+      onLoaded: () => _isInterstitialLoaded = true,
+      onError: (code, message) {
+        debugPrint('Interstitial ad error: $code - $message');
+      },
+      onDismissed: () {
+        _isInterstitialLoaded = false;
+        _interstitialAd?.destroy();
+        loadInterstitial(placementId: placementId);
       },
     );
+    _interstitialAd?.load();
   }
 
   /// Shows the loaded interstitial ad if available.
   void showInterstitial() {
     if (_isInterstitialLoaded) {
-      FacebookInterstitialAd.showInterstitialAd();
+      _interstitialAd?.show();
     } else {
       debugPrint("Interstitial Ad not yet loaded!");
     }
@@ -56,23 +68,28 @@ class FanEasy {
 
   /// Loads a rewarded video ad with the given [placementId].
   void loadRewarded({required String placementId}) {
-    FacebookRewardedVideoAd.loadRewardedVideoAd(
-      placementId: placementId,
-      listener: (result, value) {
-        if (result == RewardedVideoAdResult.LOADED) _isRewardedLoaded = true;
-        if (result == RewardedVideoAdResult.VIDEO_CLOSED &&
-            (value == true || value["invalidated"] == true)) {
-          _isRewardedLoaded = false;
-          loadRewarded(placementId: placementId);
-        }
+    if (placementId.isEmpty) {
+      return;
+    }
+    _rewardedAd = RewardedAd(placementId);
+    _rewardedAd?.listener = RewardedAdListener(
+      onLoaded: () => _isRewardedLoaded = true,
+      onError: (code, message) {
+        debugPrint('Rewarded ad error: $code - $message');
+      },
+      onVideoClosed: () {
+        _isRewardedLoaded = false;
+        _rewardedAd?.destroy();
+        loadRewarded(placementId: placementId);
       },
     );
+    _rewardedAd?.load();
   }
 
   /// Shows the loaded rewarded video ad if available.
   void showRewarded() {
     if (_isRewardedLoaded) {
-      FacebookRewardedVideoAd.showRewardedVideoAd();
+      _rewardedAd?.show();
     } else {
       debugPrint("Rewarded Ad not yet loaded!");
     }
@@ -82,15 +99,21 @@ class FanEasy {
   bool get rewardedLoaded => _isRewardedLoaded;
 
   /// Returns a banner ad widget with the given [placementId] and [bannerSize].
-  Widget bannerAd(
-      {required String placementId,
-      BannerSize bannerSize = BannerSize.STANDARD}) {
-    return FacebookBannerAd(
+  Widget bannerAd({
+    required String placementId,
+    BannerSize bannerSize = BannerSize.STANDARD,
+  }) {
+    if (placementId.isEmpty) {
+      return const SizedBox();
+    }
+    return BannerAd(
       placementId: placementId,
       bannerSize: bannerSize,
-      listener: (result, value) {
-        debugPrint("Banner Ad: $result -->  $value");
-      },
+      listener: BannerAdListener(
+        onError: (code, message) =>
+            debugPrint('Banner Ad Error: $code - $message'),
+        onLoaded: () => debugPrint('Banner Ad Loaded'),
+      ),
     );
   }
 
@@ -99,7 +122,10 @@ class FanEasy {
       {required String placementId,
       double width = double.infinity,
       double height = 300}) {
-    return FacebookNativeAd(
+    if (placementId.isEmpty) {
+      return const SizedBox();
+    }
+    return NativeAd(
       placementId: placementId,
       adType: NativeAdType.NATIVE_AD_VERTICAL,
       width: width,
@@ -110,9 +136,11 @@ class FanEasy {
       buttonColor: Colors.deepPurple,
       buttonTitleColor: Colors.white,
       buttonBorderColor: Colors.white,
-      listener: (result, value) {
-        debugPrint("Native Ad: $result --> $value");
-      },
+      listener: NativeAdListener(
+        onError: (code, message) =>
+            debugPrint('Native Ad Error: $code - $message'),
+        onLoaded: () => debugPrint('Native Ad Loaded'),
+      ),
       keepExpandedWhileLoading: true,
       expandAnimationDuraion: 1000,
     );
